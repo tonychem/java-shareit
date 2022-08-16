@@ -1,12 +1,15 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.storage;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.exception.exceptions.NoSuchUserException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Repository
@@ -14,7 +17,7 @@ import java.util.stream.Collectors;
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Long, User> users = new HashMap<>();
-    private final UserMapper mapper;
+    private final UserMapper userMapper;
 
     private long currentId = 1;
 
@@ -26,34 +29,29 @@ public class InMemoryUserStorage implements UserStorage {
             throw new NoSuchUserException("Не существует пользователя с id = " + id);
         }
 
-        return mapper.toUserDto(fetchedUser);
+        return userMapper.toUserDto(fetchedUser);
     }
 
     @Override
     public Collection<UserDto> users() {
         return users.values().stream()
-                .map(mapper::toUserDto)
+                .map(userMapper::toUserDto)
                 .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
     public UserDto create(UserDto userDto) {
-
-        if (userDto.getEmail() != null) {
-            boolean uniqueEmail = users.values().stream()
-                    .noneMatch(x -> x.getEmail().equals(userDto.getEmail()));
-            if (!uniqueEmail) {
-                throw new ConflictingFieldsException("Пользователь с email-ом " + userDto.getEmail() + " уже существует");
-            }
-        } else {
+        if (userDto.getEmail() == null) {
             throw new IllegalStateException("Нельзя создать пользователя без email-a.");
         }
 
-        User userToAdd = mapper.toUser(userDto);
+        checkMailAlreadyExists(userDto);
+
+        User userToAdd = userMapper.toUser(userDto);
         userToAdd.setId(currentId);
         users.put(currentId, userToAdd);
         currentId++;
-        return mapper.toUserDto(userToAdd);
+        return userMapper.toUserDto(userToAdd);
     }
 
     @Override
@@ -61,9 +59,9 @@ public class InMemoryUserStorage implements UserStorage {
         String name;
         String email;
 
-        UserDto currentUserDto = mapper.toUserDto(users.get(id));
+        UserDto currentUserDto = userMapper.toUserDto(users.get(id));
 
-        if (userDto.getEmail() != null ) {
+        if (userDto.getEmail() != null) {
             checkMailAlreadyExists(userDto);
             email = userDto.getEmail();
         } else {
@@ -78,7 +76,7 @@ public class InMemoryUserStorage implements UserStorage {
 
         User updatedUser = new User(id, name, email);
         users.put(id, updatedUser);
-        return mapper.toUserDto(updatedUser);
+        return userMapper.toUserDto(updatedUser);
     }
 
     @Override
@@ -88,7 +86,10 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public boolean exists(long id) {
-        return users.get(id) != null;
+        if (users.get(id) == null) {
+            throw new NoSuchUserException("Не существует пользователя с id = " + id);
+        }
+        return true;
     }
 
     private boolean checkMailAlreadyExists(UserDto userDto) {

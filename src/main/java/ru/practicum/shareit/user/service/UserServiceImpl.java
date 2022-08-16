@@ -1,8 +1,10 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.Collection;
 
@@ -34,9 +36,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(long id, UserDto userDto) {
-        if (!userStorage.exists(id)) {
-            throw new NoSuchUserException("Не существует пользователя с id = " + id);
-        }
+        userStorage.exists(id);
         return userStorage.update(id, userDto);
     }
 }
