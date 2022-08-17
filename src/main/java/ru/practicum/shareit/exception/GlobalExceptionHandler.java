@@ -1,47 +1,40 @@
 package ru.practicum.shareit.exception;
 
-import org.apache.coyote.Response;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.practicum.shareit.exception.exceptions.ConflictingFieldsException;
 import ru.practicum.shareit.exception.exceptions.NoSuchItemException;
 import ru.practicum.shareit.exception.exceptions.NoSuchUserException;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolationException;
+import java.io.IOException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<String> handleIllegalStateException(IllegalStateException exc) {
-        return new ResponseEntity<>(exc.getMessage(), HttpStatus.BAD_REQUEST);
+    public void handleIllegalStateException(IllegalStateException exc, HttpServletResponse resp) throws IOException {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, exc.getMessage());
     }
 
     @ExceptionHandler(value = {NoSuchUserException.class, NoSuchItemException.class})
-    public ResponseEntity<String> handleMissingEntityExceptions(RuntimeException exc) {
-        return new ResponseEntity<>(exc.getMessage(), HttpStatus.NOT_FOUND);
+    public void handleMissingEntityExceptions(RuntimeException exc, HttpServletResponse resp) throws IOException {
+        resp.sendError(HttpServletResponse.SC_NOT_FOUND, exc.getMessage());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException exc) {
-        return new ResponseEntity<>(exc.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException exc) {
-        return new ResponseEntity<>(exc.getMessage(), HttpStatus.BAD_REQUEST);
+    public void handleMethodArgumentNotValidException(ConstraintViolationException exc, HttpServletResponse resp) throws IOException {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, exc.getMessage());
     }
 
     @ExceptionHandler(ConflictingFieldsException.class)
-    public ResponseEntity<String> handleConflictingFieldsException(ConflictingFieldsException exc) {
-        return new ResponseEntity<>(exc.getMessage(), HttpStatus.CONFLICT);
+    public void handleConflictingFieldsException(ConflictingFieldsException exc, HttpServletResponse resp) throws IOException {
+        resp.sendError(HttpServletResponse.SC_CONFLICT, exc.getMessage());
     }
 
     @ExceptionHandler(SecurityException.class)
-    public ResponseEntity<String> handleSecurityException(SecurityException exc) {
-        return new ResponseEntity<>(exc.getMessage(), HttpStatus.FORBIDDEN);
+    public void handleSecurityException(SecurityException exc, HttpServletResponse resp) throws IOException {
+        resp.sendError(HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
     }
 }

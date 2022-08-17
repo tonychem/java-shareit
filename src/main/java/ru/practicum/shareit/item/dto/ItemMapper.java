@@ -1,16 +1,12 @@
 package ru.practicum.shareit.item.dto;
 
 import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
 import ru.practicum.shareit.item.model.Item;
 
-import javax.validation.Valid;
-
 @Component
-@Validated
 public class ItemMapper {
 
-    public ItemDto toItemDto(@Valid Item item) {
+    public ItemDto toItemDto(Item item) {
         return new ItemDto(item.getId(),
                 item.getName(),
                 item.getDescription(),
@@ -20,9 +16,9 @@ public class ItemMapper {
         );
     }
 
-    public Item toItem(@Valid ItemDto itemDto) {
+    public Item toItem(ItemDto itemDto) {
         if (itemDto.getName() == null || itemDto.getDescription() == null || itemDto.getAvailable() == null) {
-            throw new IllegalStateException("...");
+            throw new IllegalStateException("Попытка создать объект Item с null-полями.");
         }
         return new Item(itemDto.getId(),
                 itemDto.getName(),

@@ -13,6 +13,9 @@ public class UserMapper {
     }
 
     public User toUser(UserDto userDto) {
+        if (userDto.getName() == null || userDto.getEmail() == null) {
+            throw new IllegalStateException("Попытка создать объект User с null-полями");
+        }
         return new User(userDto.getId(),
                 userDto.getName(),
                 userDto.getEmail()
