@@ -18,6 +18,7 @@ public class InMemoryItemStorage implements ItemStorage {
     private final ItemMapper itemMapper;
     private final Map<Long, Item> items = new HashMap<>();
     private long currentId = 1;
+
     @Override
     public ItemDto createItem(long userId, ItemDto itemDto) {
         Item itemToAdd = itemMapper.toItem(itemDto);
