@@ -32,14 +32,11 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public ItemDto itemById(long itemId) {
-        exists(itemId);
         return itemMapper.toItemDto(items.get(itemId));
     }
 
     @Override
     public ItemDto updateItem(long itemId, ItemDto itemDto) {
-        exists(itemId);
-
         String name;
         String description;
         Boolean status;
@@ -73,33 +70,12 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public Collection<ItemDto> itemsOfUser(long userId) {
-        return items.values().stream()
-                .filter(x -> x.getOwner() == userId)
-                .map(itemMapper::toItemDto)
-                .collect(Collectors.toList());
+    public Collection<ItemDto> items() {
+        return items.values().stream().map(itemMapper::toItemDto).collect(Collectors.toUnmodifiableList());
     }
 
     @Override
-    public Collection<ItemDto> itemsByKeyword(String text) {
-        if (text.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return items.values().stream()
-                .filter(x -> {
-                    String nameLowered = x.getName().toLowerCase();
-                    String descriptionLowered = x.getDescription().toLowerCase();
-                    String searchTextLowered = text.toLowerCase();
-
-                    return nameLowered.contains(searchTextLowered) || descriptionLowered.contains(searchTextLowered);
-                })
-                .filter(Item::getAvailable)
-                .map(itemMapper::toItemDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean exists(long itemId) {
+    public boolean checkExists(long itemId) {
         if (items.get(itemId) == null) {
             throw new NoSuchItemException("Не существует вещи с id = " + itemId);
         }

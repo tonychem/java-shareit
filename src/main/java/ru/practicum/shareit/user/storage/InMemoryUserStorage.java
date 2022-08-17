@@ -19,17 +19,11 @@ public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Long, User> users = new HashMap<>();
     private final UserMapper userMapper;
-
     private long currentId = 1;
 
     @Override
     public UserDto userById(long id) {
         User fetchedUser = users.get(id);
-
-        if (fetchedUser == null) {
-            throw new NoSuchUserException("Не существует пользователя с id = " + id);
-        }
-
         return userMapper.toUserDto(fetchedUser);
     }
 
@@ -86,7 +80,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public boolean exists(long id) {
+    public boolean checkExists(long id) {
         if (users.get(id) == null) {
             throw new NoSuchUserException("Не существует пользователя с id = " + id);
         }

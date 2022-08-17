@@ -3,7 +3,6 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.Collection;
@@ -21,6 +20,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto userById(long id) {
+        userStorage.checkExists(id);
         return userStorage.userById(id);
     }
 
@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(long id, UserDto userDto) {
-        userStorage.exists(id);
+        userStorage.checkExists(id);
         return userStorage.update(id, userDto);
     }
 }

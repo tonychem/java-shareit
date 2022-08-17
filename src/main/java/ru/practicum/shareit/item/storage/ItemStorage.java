@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.storage;
 
 import ru.practicum.shareit.item.dto.ItemDto;
 
-import java.awt.*;
 import java.util.Collection;
 
 public interface ItemStorage {
@@ -12,9 +11,7 @@ public interface ItemStorage {
 
     ItemDto updateItem(long itemId, ItemDto itemDto);
 
-    Collection<ItemDto> itemsOfUser(long userId);
+    boolean checkExists(long itemId);
 
-    Collection<ItemDto> itemsByKeyword(String text);
-
-    boolean exists(long itemId);
+    Collection<ItemDto> items();
 }
