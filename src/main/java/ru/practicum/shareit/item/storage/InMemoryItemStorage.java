@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 @Repository
 @RequiredArgsConstructor
 public class InMemoryItemStorage implements ItemStorage {
-
     private final ItemMapper itemMapper;
     private final Map<Long, Item> items = new HashMap<>();
     private long currentId = 1;
