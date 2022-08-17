@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.storage;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.exception.exceptions.ConflictingFieldsException;
 import ru.practicum.shareit.exception.exceptions.NoSuchUserException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
@@ -96,7 +97,7 @@ public class InMemoryUserStorage implements UserStorage {
         boolean emailExists = users.values().stream()
                 .anyMatch(x -> x.getEmail().equals(userDto.getEmail()));
         if (emailExists) {
-            throw new IllegalStateException("Такой email уже существует");
+            throw new ConflictingFieldsException("Такой email уже существует");
         }
         return false;
     }

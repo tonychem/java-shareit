@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.practicum.shareit.exception.exceptions.ConflictingFieldsException;
 import ru.practicum.shareit.exception.exceptions.NoSuchItemException;
 import ru.practicum.shareit.exception.exceptions.NoSuchUserException;
 
@@ -32,5 +33,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException exc) {
         return new ResponseEntity<>(exc.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConflictingFieldsException.class)
+    public ResponseEntity<String> handleConflictingFieldsException(ConflictingFieldsException exc) {
+        return new ResponseEntity<>(exc.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<String> handleSecurityException(SecurityException exc) {
+        return new ResponseEntity<>(exc.getMessage(), HttpStatus.FORBIDDEN);
     }
 }

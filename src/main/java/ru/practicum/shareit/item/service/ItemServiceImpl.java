@@ -24,7 +24,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto update(long userId, long itemId, ItemDto itemDto) {
         if (itemStorage.itemById(itemId).getOwner() != userId) {
-            throw new IllegalStateException("Вы не владелец вещи!");
+            throw new SecurityException("Вы не владелец вещи!");
         }
         return itemStorage.updateItem(itemId, itemDto);
     }
