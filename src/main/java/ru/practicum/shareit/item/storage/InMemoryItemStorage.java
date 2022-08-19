@@ -6,6 +6,8 @@ import ru.practicum.shareit.exception.exceptions.NoSuchItemException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.dto.UserMapper;
+import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,13 +18,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class InMemoryItemStorage implements ItemStorage {
     private final ItemMapper itemMapper;
+    private final UserMapper userMapper;
+
+    private final UserStorage userStorage;
     private final Map<Long, Item> items = new HashMap<>();
     private long currentId = 1;
 
     @Override
     public ItemDto createItem(long userId, ItemDto itemDto) {
         Item itemToAdd = itemMapper.toItem(itemDto);
-        itemToAdd.setOwner(userId);
+        itemToAdd.setOwner(userMapper.toUser(userStorage.userById(userId)));
         itemToAdd.setId(currentId);
         items.put(currentId, itemToAdd);
         currentId++;

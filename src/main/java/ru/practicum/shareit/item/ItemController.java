@@ -39,6 +39,6 @@ public class ItemController {
 
     @GetMapping("/search")
     public Collection<ItemDto> itemSearch(@RequestParam("text") String text) {
-        return itemService.searchByKeyword(text);
+        return itemService.searchByNameAndDescription(text);
     }
 }

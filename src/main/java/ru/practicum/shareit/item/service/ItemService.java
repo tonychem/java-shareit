@@ -13,5 +13,5 @@ public interface ItemService {
 
     Collection<ItemDto> itemsOfUser(long userId);
 
-    Collection<ItemDto> searchByKeyword(String text);
+    Collection<ItemDto> searchByNameAndDescription(String text);
 }

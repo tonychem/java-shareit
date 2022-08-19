@@ -8,6 +8,7 @@ import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +28,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto update(long userId, long itemId, ItemDto itemDto) {
         itemStorage.checkExists(itemId);
 
-        if (itemStorage.itemById(itemId).getOwner() != userId) {
+        if (itemStorage.itemById(itemId).getOwner().getId() != userId) {
             throw new SecurityException("Пользователь (id=" + userId + ") не является владельцем вещи (id=" + itemId + ").");
         }
 
@@ -45,24 +46,24 @@ public class ItemServiceImpl implements ItemService {
         userStorage.checkExists(userId);
 
         return itemStorage.items().stream()
-                .filter(x -> x.getOwner() == userId)
+                .filter(x -> x.getOwner().getId() == userId)
                 .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
-    public Collection<ItemDto> searchByKeyword(String text) {
+    public Collection<ItemDto> searchByNameAndDescription(String text) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
         return itemStorage.items().stream()
                 .filter(x -> {
-                    String nameLowered = x.getName().toLowerCase();
-                    String descriptionLowered = x.getDescription().toLowerCase();
+                    String nameLowered = Optional.ofNullable(x.getName()).map(String::toLowerCase).orElse("");
+                    String descriptionLowered = Optional.ofNullable(x.getDescription()).map(String::toLowerCase).orElse("");
                     String searchTextLowered = text.toLowerCase();
 
                     return nameLowered.contains(searchTextLowered) || descriptionLowered.contains(searchTextLowered);
                 })
-                .filter(ItemDto::getAvailable)
+                .filter(x -> x.getAvailable() != null && x.getAvailable())
                 .collect(Collectors.toList());
     }
 }

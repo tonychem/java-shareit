@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.Value;
 import org.springframework.lang.Nullable;
+import ru.practicum.shareit.requests.model.ItemRequest;
+import ru.practicum.shareit.user.model.User;
 
 import javax.validation.constraints.NotBlank;
 
@@ -18,7 +20,7 @@ public class ItemDto {
     @Nullable
     Boolean available;
     @Nullable
-    long owner;
+    User owner;
     @Nullable
-    long request;
+    ItemRequest request;
 }
