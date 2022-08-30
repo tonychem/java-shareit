@@ -9,15 +9,15 @@ import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
 public class InMemoryUserStorage implements UserStorage {
 
-    private final Map<Long, User> users = new HashMap<>();
+    private final Map<Long, User> users = new ConcurrentHashMap<>();
     private final UserMapper userMapper;
     private long currentId = 1;
 
