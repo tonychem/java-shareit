@@ -1,20 +1,23 @@
 package ru.practicum.shareit.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.practicum.shareit.exception.exceptions.ConflictingFieldsException;
 import ru.practicum.shareit.exception.exceptions.NoSuchItemException;
 import ru.practicum.shareit.exception.exceptions.NoSuchUserException;
 
+import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolationException;
 import java.io.IOException;
+import java.sql.SQLException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(IllegalStateException.class)
-    public void handleIllegalStateException(IllegalStateException exc, HttpServletResponse resp) throws IOException {
+    @ExceptionHandler(value = {IllegalStateException.class, MethodArgumentNotValidException.class})
+    public void handleBadRequests(RuntimeException exc, HttpServletResponse resp) throws IOException {
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, exc.getMessage());
     }
 
@@ -23,13 +26,18 @@ public class GlobalExceptionHandler {
         resp.sendError(HttpServletResponse.SC_NOT_FOUND, exc.getMessage());
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public void handleMethodArgumentNotValidException(ConstraintViolationException exc, HttpServletResponse resp) throws IOException {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, exc.getMessage());
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public void handleConstraintViolationException(DataIntegrityViolationException exc, HttpServletResponse resp) throws IOException {
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.getMessage());
     }
 
-    @ExceptionHandler(ConflictingFieldsException.class)
-    public void handleConflictingFieldsException(ConflictingFieldsException exc, HttpServletResponse resp) throws IOException {
+    @ExceptionHandler(SQLException.class)
+    public void handleSQLException(SQLException exc, HttpServletResponse resp) throws IOException {
+        resp.sendError(HttpServletResponse.SC_CONFLICT, exc.getMessage());
+    }
+
+    @ExceptionHandler(value = {ConflictingFieldsException.class, PersistenceException.class})
+    public void handleConflictingFieldsException(RuntimeException exc, HttpServletResponse resp) throws IOException {
         resp.sendError(HttpServletResponse.SC_CONFLICT, exc.getMessage());
     }
 

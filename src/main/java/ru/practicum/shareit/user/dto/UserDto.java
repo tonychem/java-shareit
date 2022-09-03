@@ -7,10 +7,11 @@ import javax.validation.constraints.Email;
 
 @Value
 public class UserDto {
-    @Nullable
     long id;
+
     @Nullable
     String name;
+
     @Nullable
     @Email
     String email;
