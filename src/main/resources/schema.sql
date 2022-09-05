@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS bookings
     end_date   timestamp                  NOT NULL,
     item_id    int8 REFERENCES items (id) NOT NULL,
     booker_id  int8 REFERENCES users (id) NOT NULL,
-    status     varchar(20)                NOT NULL
+    booking_status     varchar(20)                NOT NULL
 );
 
 

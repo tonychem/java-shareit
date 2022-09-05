@@ -1,9 +1,16 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.BookingDtoShort;
+import ru.practicum.shareit.booking.dto.BookingMapper;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.exceptions.NoSuchItemException;
 import ru.practicum.shareit.exception.exceptions.NoSuchUserException;
+import ru.practicum.shareit.item.dto.ItemBookingDataDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -13,27 +20,26 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Lazy))
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final ItemMapper itemMapper;
-    private final UserStorage userStorage;
+    private final BookingMapper bookingMapper;
+    @Lazy
+    private final BookingRepository bookingRepository;
 
     @Override
     @Transactional
     public ItemDto create(long userId, ItemDto itemDto) {
-        if (!userRepository.existsById(userId)) {
-            throw new NoSuchUserException("Не существует пользователя с id = " + userId);
-        }
-
         User creator = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchUserException("Не существует пользователя с id = " + userId));
 
@@ -75,21 +81,26 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto itemById(long itemId) {
-        ItemDto itemDtoToReturn = itemRepository.findById(itemId).map(itemMapper::toItemDto).orElseThrow(
+    public ItemBookingDataDto itemById(long userId, long itemId) {
+        Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NoSuchItemException("Не сущетсвует предмета с id = " + itemId));
-        return itemDtoToReturn;
+
+        if (item.getOwner().getId() != userId) {
+            return itemMapper.toItemBookingDataDto(item, null ,null);
+        }
+
+        return getItemWithBookingDate(userId, itemId);
     }
 
     @Override
     @Transactional
-    public Collection<ItemDto> itemsOfUser(long userId) {
+    public Collection<ItemBookingDataDto> itemsOfUser(long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NoSuchUserException("Не существует пользователя с id = " + userId);
         }
         List<Item> itemsOfUser = itemRepository.findItemsOwnedBy(userId);
 
-        return itemsOfUser.stream().map(itemMapper::toItemDto).collect(Collectors.toUnmodifiableList());
+        return itemsOfUser.stream().map(x -> {return getItemWithBookingDate(userId, x.getId());}).collect(Collectors.toUnmodifiableList());
     }
 
     @Override
@@ -100,5 +111,20 @@ public class ItemServiceImpl implements ItemService {
         }
         List<Item> found = itemRepository.search(text);
         return found.stream().filter(Item::getAvailable).map(itemMapper::toItemDto).collect(Collectors.toUnmodifiableList());
+    }
+
+    @Transactional
+    public ItemBookingDataDto getItemWithBookingDate(long userId, long itemId) {
+        LocalDateTime now = LocalDateTime.now();
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchItemException("Не существует предмета с id = " + itemId));
+
+        if (item.getOwner().getId() != userId) {
+            throw new SecurityException("Не владелец вещи!");
+        }
+
+        BookingDtoShort previousBooking = bookingMapper.toBookingDtoShort(bookingRepository.getPreviousBooking(itemId, now));
+        BookingDtoShort nextBooking = bookingMapper.toBookingDtoShort(bookingRepository.getNextBooking(itemId, now));
+
+        return itemMapper.toItemBookingDataDto(item, previousBooking, nextBooking);
     }
 }

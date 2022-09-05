@@ -1,14 +1,47 @@
 package ru.practicum.shareit.booking;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.service.BookingService;
 
-/**
- * // TODO .
- */
+import javax.validation.Valid;
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/bookings")
+@RequiredArgsConstructor
+@Validated
 public class BookingController {
 
+    private final BookingService bookingService;
+    @PostMapping
+    public BookingDto createBooking(@RequestHeader("X-Sharer-User-Id") long userId, @RequestBody @Valid BookingDto bookingDto) {
+        return bookingService.createBooking(userId, bookingDto);
+    }
+
+    @PatchMapping(value = "/{bookingId}")
+    public BookingDto setBookingStatus(@RequestHeader("X-Sharer-User-Id") long userId, @RequestParam("approved") boolean approved,
+                                       @PathVariable long bookingId) {
+        return bookingService.setBookingStatus(userId, bookingId, approved);
+    }
+
+    @GetMapping(value = "/{bookingId}")
+    public BookingDto getBooking(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long bookingId) {
+        return bookingService.getBooking(userId, bookingId);
+    }
+
+    @GetMapping
+    public List<BookingDto> getListOfBookingsByState(@RequestHeader("X-Sharer-User-Id") long userId, @RequestParam(name = "state", defaultValue = "ALL") String state) {
+        String uppercasedState = state.toUpperCase();
+        return bookingService.getListOfBookingsByState(userId, uppercasedState);
+    }
+
+    @GetMapping(value = "/owner")
+    public List<BookingDto> getListOfBookedItemsByOwner(@RequestHeader( "X-Sharer-User-Id") long userId,
+                                                        @RequestParam(name = "state", defaultValue = "ALL") String state) {
+        String uppercasedState = state.toUpperCase();
+        return bookingService.getListOfBookedItemsByOwner(userId, state);
+    }
 }
