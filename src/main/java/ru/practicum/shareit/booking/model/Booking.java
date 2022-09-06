@@ -22,14 +22,18 @@ public class Booking {
 
     @Column(name = "start_date", nullable = false)
     private LocalDateTime start;
+
     @Column(name = "end_date", nullable = false)
     private LocalDateTime end;
+
     @OneToOne(cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinColumn(name = "item_id")
     private Item item;
+
     @OneToOne(cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinColumn(name = "booker_id")
     private User booker;
+
     @Column(name = "booking_status")
     @Enumerated(EnumType.STRING)
     private BookingStatus status;

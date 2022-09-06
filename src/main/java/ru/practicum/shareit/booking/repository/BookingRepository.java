@@ -27,7 +27,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByItem_idAndBooker_idAndStatusAndEndBefore(long itemId, long bookerId, BookingStatus status, LocalDateTime now);
 
     @Query(value = "select * from Bookings where item_id = :itemId and end_date < :now order by end_date desc limit 1",
-    nativeQuery = true)
+            nativeQuery = true)
     Booking getPreviousBooking(long itemId, LocalDateTime now);
 
     @Query(value = "select * from Bookings where item_id = :itemId and start_date > :now order by start_date limit 1",

@@ -6,7 +6,7 @@ import ru.practicum.shareit.item.model.Comment;
 @Component
 public class CommentMapper {
     public Comment toComment(IncomingCommentDto incomingCommentDto) {
-        return new Comment(incomingCommentDto.getId(), incomingCommentDto.getText(), null ,null, null);
+        return new Comment(incomingCommentDto.getId(), incomingCommentDto.getText(), null, null, null);
     }
 
     public IncomingCommentDto toCommentDto(Comment comment) {

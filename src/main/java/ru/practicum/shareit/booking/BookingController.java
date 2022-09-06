@@ -16,6 +16,7 @@ import java.util.List;
 public class BookingController {
 
     private final BookingService bookingService;
+
     @PostMapping
     public BookingDto createBooking(@RequestHeader("X-Sharer-User-Id") long userId, @RequestBody @Valid BookingDto bookingDto) {
         return bookingService.createBooking(userId, bookingDto);
@@ -39,7 +40,7 @@ public class BookingController {
     }
 
     @GetMapping(value = "/owner")
-    public List<BookingDto> getListOfBookedItemsByOwner(@RequestHeader( "X-Sharer-User-Id") long userId,
+    public List<BookingDto> getListOfBookedItemsByOwner(@RequestHeader("X-Sharer-User-Id") long userId,
                                                         @RequestParam(name = "state", defaultValue = "ALL") String state) {
         String uppercasedState = state.toUpperCase();
         return bookingService.getListOfBookedItemsByOwner(userId, state);
