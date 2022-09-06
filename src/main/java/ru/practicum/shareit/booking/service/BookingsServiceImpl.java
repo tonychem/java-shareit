@@ -164,14 +164,14 @@ public class BookingsServiceImpl implements BookingService {
         switch (state) {
             case ("CURRENT"):
                 result = allBookedItemsOfUser.stream()
-                        .filter(x -> x.getStart().isAfter(now) && x.getEnd().isBefore(now))
+                        .filter(x -> x.getStart().isBefore(now) && x.getEnd().isAfter(now))
                         .sorted(compareByEndTimeDesc)
                         .map(bookingMapper::toBookingDto)
                         .collect(Collectors.toUnmodifiableList());
                 break;
             case ("PAST"):
                 result = allBookedItemsOfUser.stream()
-                        .filter(x -> x.getStart().isBefore(now) && x.getEnd().isAfter(now))
+                        .filter(x -> x.getStart().isBefore(now) && x.getEnd().isBefore(now))
                         .sorted(compareByEndTimeDesc)
                         .map(bookingMapper::toBookingDto)
                         .collect(Collectors.toUnmodifiableList());

@@ -8,6 +8,7 @@ import ru.practicum.shareit.requests.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -6,18 +6,17 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.exceptions.NoSuchItemException;
 import ru.practicum.shareit.exception.exceptions.NoSuchUserException;
-import ru.practicum.shareit.item.dto.ItemBookingDataDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.storage.UserStorage;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -36,6 +35,9 @@ public class ItemServiceImpl implements ItemService {
     private final BookingMapper bookingMapper;
     @Lazy
     private final BookingRepository bookingRepository;
+
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
 
     @Override
     @Transactional
@@ -81,26 +83,31 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemBookingDataDto itemById(long userId, long itemId) {
+    public ItemBookingCommentDataDto itemById(long userId, long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NoSuchItemException("Не сущетсвует предмета с id = " + itemId));
+        List<OutcomingCommentDto> comments = commentRepository.findCommentsByItem_id(itemId).stream()
+                .map(commentMapper::toOutcomingCommentDto)
+                .collect(Collectors.toUnmodifiableList());
 
         if (item.getOwner().getId() != userId) {
-            return itemMapper.toItemBookingDataDto(item, null ,null);
+            return itemMapper.toItemBookingCommentDataDto(item, null, null, comments);
         }
 
-        return getItemWithBookingDate(userId, itemId);
+        return getItemWithBookingDateAndComment(userId, itemId);
     }
 
     @Override
     @Transactional
-    public Collection<ItemBookingDataDto> itemsOfUser(long userId) {
+    public Collection<ItemBookingCommentDataDto> itemsOfUser(long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NoSuchUserException("Не существует пользователя с id = " + userId);
         }
         List<Item> itemsOfUser = itemRepository.findItemsOwnedBy(userId);
 
-        return itemsOfUser.stream().map(x -> {return getItemWithBookingDate(userId, x.getId());}).collect(Collectors.toUnmodifiableList());
+        return itemsOfUser.stream().map(x -> {
+            return getItemWithBookingDateAndComment(userId, x.getId());
+        }).collect(Collectors.toUnmodifiableList());
     }
 
     @Override
@@ -114,7 +121,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Transactional
-    public ItemBookingDataDto getItemWithBookingDate(long userId, long itemId) {
+    public ItemBookingCommentDataDto getItemWithBookingDateAndComment(long userId, long itemId) {
         LocalDateTime now = LocalDateTime.now();
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchItemException("Не существует предмета с id = " + itemId));
 
@@ -124,7 +131,32 @@ public class ItemServiceImpl implements ItemService {
 
         BookingDtoShort previousBooking = bookingMapper.toBookingDtoShort(bookingRepository.getPreviousBooking(itemId, now));
         BookingDtoShort nextBooking = bookingMapper.toBookingDtoShort(bookingRepository.getNextBooking(itemId, now));
+        List<OutcomingCommentDto> comments = commentRepository.findCommentsByItem_id(itemId).stream()
+                .map(commentMapper::toOutcomingCommentDto)
+                .collect(Collectors.toUnmodifiableList());
 
-        return itemMapper.toItemBookingDataDto(item, previousBooking, nextBooking);
+        return itemMapper.toItemBookingCommentDataDto(item, previousBooking, nextBooking, comments);
+    }
+
+    @Override
+    @Transactional
+    public OutcomingCommentDto createComment(long userId, long itemId, IncomingCommentDto incomingCommentDto) {
+        User tenant = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchUserException("Не существует пользователя с id = " + userId));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NoSuchItemException("Не существует вещи с id = " + itemId));
+
+        List<Booking> bookingsByUser = bookingRepository.findByItem_idAndBooker_idAndStatusAndEndBefore(itemId, userId, BookingStatus.APPROVED, LocalDateTime.now());
+
+        if(bookingsByUser.isEmpty()) {
+            throw new IllegalStateException("Пользователь не найден в арендаторах вещи");
+        }
+
+        Comment comment = commentMapper.toComment(incomingCommentDto);
+        comment.setAuthor(tenant);
+        comment.setCreated(LocalDateTime.now());
+        comment.setItem(item);
+        Comment savedComment = commentRepository.save(comment);
+        return commentMapper.toOutcomingCommentDto(savedComment);
     }
 }

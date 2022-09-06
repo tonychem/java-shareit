@@ -2,16 +2,14 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.Value;
 import org.springframework.lang.Nullable;
-import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.requests.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @Value
-public class ItemBookingDataDto {
+public class ItemBookingCommentDataDto {
     long id;
     @Nullable
     @NotBlank
@@ -27,4 +25,6 @@ public class ItemBookingDataDto {
     BookingDtoShort lastBooking;
     @Nullable
     BookingDtoShort nextBooking;
+    @Nullable
+    List<OutcomingCommentDto> comments;
 }
