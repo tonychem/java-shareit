@@ -29,7 +29,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public UserDto userById(long id) {
         Optional<User> fetchedUser = userRepository.findById(id);
         UserDto userDto = userMapper.toUserDto(fetchedUser.orElseThrow(() ->
@@ -38,7 +37,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public Collection<UserDto> users() {
         Collection<User> users = userRepository.findAll();
         return users.stream().map(userMapper::toUserDto).collect(Collectors.toUnmodifiableList());

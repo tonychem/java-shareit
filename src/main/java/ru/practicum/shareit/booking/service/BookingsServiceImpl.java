@@ -89,7 +89,6 @@ public class BookingsServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional
     public BookingDto getBooking(long userId, long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NoSuchBookingException("Не существует бронирования с id = " + bookingId));
@@ -103,7 +102,6 @@ public class BookingsServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional
     public List<BookingDto> getListOfBookingsByState(long userId, String state) {
         if (!userRepository.existsById(userId)) {
             throw new NoSuchUserException("Не существует пользователя с id = " + userId);
@@ -115,22 +113,22 @@ public class BookingsServiceImpl implements BookingService {
 
         switch (state) {
             case ("CURRENT"):
-                bookings = bookingRepository.findByBooker_idAndStartBeforeAndEndAfter(userId, now, now, sort);
+                bookings = bookingRepository.findByBookerIdAndStartBeforeAndEndAfter(userId, now, now, sort);
                 break;
             case ("PAST"):
-                bookings = bookingRepository.findByBooker_idAndEndBefore(userId, now, sort);
+                bookings = bookingRepository.findByBookerIdAndEndBefore(userId, now, sort);
                 break;
             case ("FUTURE"):
-                bookings = bookingRepository.findByBooker_idAndStartAfter(userId, now, sort);
+                bookings = bookingRepository.findByBookerIdAndStartAfter(userId, now, sort);
                 break;
             case ("WAITING"):
-                bookings = bookingRepository.findByBooker_idAndStatus(userId, BookingStatus.WAITING, sort);
+                bookings = bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.WAITING, sort);
                 break;
             case ("REJECTED"):
-                bookings = bookingRepository.findByBooker_idAndStatus(userId, BookingStatus.REJECTED, sort);
+                bookings = bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.REJECTED, sort);
                 break;
             case ("ALL"):
-                bookings = bookingRepository.findByBooker_id(userId, sort);
+                bookings = bookingRepository.findByBookerId(userId, sort);
                 break;
             default:
                 throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
@@ -140,7 +138,6 @@ public class BookingsServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional
     public List<BookingDto> getListOfBookedItemsByOwner(long userId, String state) {
         if (!userRepository.existsById(userId)) {
             throw new NoSuchUserException("Не существует пользователя с id = " + userId);

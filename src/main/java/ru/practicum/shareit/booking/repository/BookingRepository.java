@@ -12,19 +12,19 @@ import java.util.Collection;
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findByBooker_idAndStatus(long bookerId, BookingStatus bookingStatus, Sort sort);
+    List<Booking> findByBookerIdAndStatus(long bookerId, BookingStatus bookingStatus, Sort sort);
 
-    List<Booking> findByBooker_idAndEndBefore(long bookerId, LocalDateTime end, Sort sort);
+    List<Booking> findByBookerIdAndEndBefore(long bookerId, LocalDateTime end, Sort sort);
 
-    List<Booking> findByBooker_idAndStartAfter(long bookerId, LocalDateTime start, Sort sort);
+    List<Booking> findByBookerIdAndStartAfter(long bookerId, LocalDateTime start, Sort sort);
 
-    List<Booking> findByBooker_idAndStartBeforeAndEndAfter(long bookerId, LocalDateTime start, LocalDateTime end, Sort sort);
+    List<Booking> findByBookerIdAndStartBeforeAndEndAfter(long bookerId, LocalDateTime start, LocalDateTime end, Sort sort);
 
-    List<Booking> findByBooker_id(long bookerId, Sort sort);
+    List<Booking> findByBookerId(long bookerId, Sort sort);
 
     List<Booking> findByItemIn(Collection<Item> items);
 
-    List<Booking> findByItem_idAndBooker_idAndStatusAndEndBefore(long itemId, long bookerId, BookingStatus status, LocalDateTime now);
+    List<Booking> findByItemIdAndBookerIdAndStatusAndEndBefore(long itemId, long bookerId, BookingStatus status, LocalDateTime now);
 
     @Query(value = "select * from Bookings where item_id = :itemId and end_date < :now order by end_date desc limit 1",
             nativeQuery = true)
