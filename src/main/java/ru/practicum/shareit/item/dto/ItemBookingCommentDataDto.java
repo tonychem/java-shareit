@@ -1,16 +1,15 @@
 package ru.practicum.shareit.item.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Value;
 import org.springframework.lang.Nullable;
-import ru.practicum.shareit.requests.model.ItemRequest;
+import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.user.model.User;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @Value
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class ItemDto {
+public class ItemBookingCommentDataDto {
     long id;
     @Nullable
     @NotBlank
@@ -23,5 +22,9 @@ public class ItemDto {
     @Nullable
     User owner;
     @Nullable
-    ItemRequest request;
+    BookingDtoShort lastBooking;
+    @Nullable
+    BookingDtoShort nextBooking;
+    @Nullable
+    List<OutcomingCommentDto> comments;
 }
