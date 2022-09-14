@@ -10,14 +10,15 @@ import java.util.List;
 public class ItemMapper {
 
     public ItemDto toItemDto(Item item) {
-        return new ItemDto(item.getId(), item.getName(), item.getDescription(), item.getAvailable(), item.getOwner(), item.getRequest());
+        Long requestId = item.getRequest() == null ? null : item.getRequest().getId();
+        return new ItemDto(item.getId(), item.getName(), item.getDescription(), item.getAvailable(), item.getOwner(), requestId);
     }
 
     public Item toItem(ItemDto itemDto) {
         if (itemDto.getName() == null || itemDto.getDescription() == null || itemDto.getAvailable() == null) {
             throw new IllegalStateException("Попытка создать объект Item с null-полями.");
         }
-        return new Item(itemDto.getId(), itemDto.getName(), itemDto.getDescription(), itemDto.getAvailable(), itemDto.getOwner(), itemDto.getRequest());
+        return new Item(itemDto.getId(), itemDto.getName(), itemDto.getDescription(), itemDto.getAvailable(), itemDto.getOwner(), null);
     }
 
     public ItemBookingCommentDataDto toItemBookingCommentDataDto(Item item, BookingDtoShort lastBooking, BookingDtoShort nextBooking, List<OutcomingCommentDto> listOfOutcomingCommentDto) {

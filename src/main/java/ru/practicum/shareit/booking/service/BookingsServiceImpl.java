@@ -1,7 +1,8 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -102,33 +103,41 @@ public class BookingsServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getListOfBookingsByState(long userId, String state) {
+    public List<BookingDto> getListOfBookingsByState(long userId, String state, Integer from, Integer size) {
         if (!userRepository.existsById(userId)) {
             throw new NoSuchUserException("Не существует пользователя с id = " + userId);
         }
 
         List<Booking> bookings;
-        Sort sort = Sort.by(Sort.Direction.DESC, "end");
         LocalDateTime now = LocalDateTime.now();
+        Pageable pageable;
+
+        if (from == null & size == null) {
+            pageable = Pageable.unpaged();
+        } else if (from < 0 || size < 1) {
+            throw new IllegalStateException("Неверные параметры запроса");
+        } else {
+            pageable = PageRequest.of(from / size, size);
+        }
 
         switch (state) {
             case ("CURRENT"):
-                bookings = bookingRepository.findByBookerIdAndStartBeforeAndEndAfter(userId, now, now, sort);
+                bookings = bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByEndDesc(userId, now, now, pageable);
                 break;
             case ("PAST"):
-                bookings = bookingRepository.findByBookerIdAndEndBefore(userId, now, sort);
+                bookings = bookingRepository.findByBookerIdAndEndBeforeOrderByEndDesc(userId, now, pageable);
                 break;
             case ("FUTURE"):
-                bookings = bookingRepository.findByBookerIdAndStartAfter(userId, now, sort);
+                bookings = bookingRepository.findByBookerIdAndStartAfterOrderByEndDesc(userId, now, pageable);
                 break;
             case ("WAITING"):
-                bookings = bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.WAITING, sort);
+                bookings = bookingRepository.findByBookerIdAndStatusOrderByEndDesc(userId, BookingStatus.WAITING, pageable);
                 break;
             case ("REJECTED"):
-                bookings = bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.REJECTED, sort);
+                bookings = bookingRepository.findByBookerIdAndStatusOrderByEndDesc(userId, BookingStatus.REJECTED, pageable);
                 break;
             case ("ALL"):
-                bookings = bookingRepository.findByBookerId(userId, sort);
+                bookings = bookingRepository.findByBookerIdOrderByEndDesc(userId, pageable);
                 break;
             default:
                 throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
@@ -138,7 +147,7 @@ public class BookingsServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getListOfBookedItemsByOwner(long userId, String state) {
+    public List<BookingDto> getListOfBookedItemsByOwner(long userId, String state, Integer from, Integer size) {
         if (!userRepository.existsById(userId)) {
             throw new NoSuchUserException("Не существует пользователя с id = " + userId);
         }
@@ -155,46 +164,46 @@ public class BookingsServiceImpl implements BookingService {
         };
 
 
-        List<BookingDto> result;
+        List<BookingDto> fullListOfBookings;
 
         switch (state) {
             case ("CURRENT"):
-                result = allBookedItemsOfUser.stream()
+                fullListOfBookings = allBookedItemsOfUser.stream()
                         .filter(x -> x.getStart().isBefore(now) && x.getEnd().isAfter(now))
                         .sorted(compareByEndTimeDesc)
                         .map(bookingMapper::toBookingDto)
                         .collect(Collectors.toUnmodifiableList());
                 break;
             case ("PAST"):
-                result = allBookedItemsOfUser.stream()
+                fullListOfBookings = allBookedItemsOfUser.stream()
                         .filter(x -> x.getStart().isBefore(now) && x.getEnd().isBefore(now))
                         .sorted(compareByEndTimeDesc)
                         .map(bookingMapper::toBookingDto)
                         .collect(Collectors.toUnmodifiableList());
                 break;
             case ("FUTURE"):
-                result = allBookedItemsOfUser.stream()
+                fullListOfBookings = allBookedItemsOfUser.stream()
                         .filter(x -> x.getStart().isAfter(now))
                         .sorted(compareByEndTimeDesc)
                         .map(bookingMapper::toBookingDto)
                         .collect(Collectors.toUnmodifiableList());
                 break;
             case ("WAITING"):
-                result = allBookedItemsOfUser.stream()
+                fullListOfBookings = allBookedItemsOfUser.stream()
                         .filter(x -> x.getStatus() == BookingStatus.WAITING)
                         .sorted(compareByEndTimeDesc)
                         .map(bookingMapper::toBookingDto)
                         .collect(Collectors.toUnmodifiableList());
                 break;
             case ("REJECTED"):
-                result = allBookedItemsOfUser.stream()
+                fullListOfBookings = allBookedItemsOfUser.stream()
                         .filter(x -> x.getStatus() == BookingStatus.REJECTED)
                         .sorted(compareByEndTimeDesc)
                         .map(bookingMapper::toBookingDto)
                         .collect(Collectors.toUnmodifiableList());
                 break;
             case ("ALL"):
-                result = allBookedItemsOfUser.stream()
+                fullListOfBookings = allBookedItemsOfUser.stream()
                         .sorted(compareByEndTimeDesc)
                         .map(bookingMapper::toBookingDto)
                         .collect(Collectors.toUnmodifiableList());
@@ -202,6 +211,16 @@ public class BookingsServiceImpl implements BookingService {
             default:
                 throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
         }
-        return result;
+
+        if (from == null & size == null) {
+            return fullListOfBookings;
+        } else if (from < 1 || size < 1) {
+            throw new IllegalStateException("Неверные параметры запроса");
+        } else {
+            return fullListOfBookings.stream()
+                    .skip(from)
+                    .limit(size)
+                    .collect(Collectors.toUnmodifiableList());
+        }
     }
 }

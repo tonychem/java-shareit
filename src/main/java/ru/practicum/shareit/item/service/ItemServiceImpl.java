@@ -9,12 +9,15 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.exceptions.NoSuchItemException;
+import ru.practicum.shareit.exception.exceptions.NoSuchRequestException;
 import ru.practicum.shareit.exception.exceptions.NoSuchUserException;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.requests.model.ItemRequest;
+import ru.practicum.shareit.requests.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -33,6 +36,8 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final ItemMapper itemMapper;
     private final BookingMapper bookingMapper;
+
+    private final RequestRepository requestRepository;
     @Lazy
     private final BookingRepository bookingRepository;
 
@@ -43,9 +48,16 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemDto create(long userId, ItemDto itemDto) {
         User creator = userRepository.findById(userId).orElseThrow(() -> new NoSuchUserException("Не существует пользователя с id = " + userId));
+        ItemRequest request = null;
+
+        if (itemDto.getRequestId() != null) {
+            request = requestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new NoSuchRequestException("Не существует запроса с id = " + itemDto.getRequestId()));
+        }
 
         Item itemToBeSaved = itemMapper.toItem(itemDto);
         itemToBeSaved.setOwner(creator);
+        itemToBeSaved.setRequest(request);
 
         Item savedItem = itemRepository.save(itemToBeSaved);
         return itemMapper.toItemDto(savedItem);
