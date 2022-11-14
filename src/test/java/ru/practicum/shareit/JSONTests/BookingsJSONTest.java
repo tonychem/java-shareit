@@ -68,7 +68,7 @@ public class BookingsJSONTest {
     @SneakyThrows
     @Test
     public void bookingDtoShortRegularTest() {
-        BookingDtoShort dto = new BookingDtoShort(1l, 2l);
+        BookingDtoShort dto = new BookingDtoShort(1L, 2L);
 
         JsonContent<BookingDtoShort> content = bookingDtoShortJacksonTester.write(dto);
 

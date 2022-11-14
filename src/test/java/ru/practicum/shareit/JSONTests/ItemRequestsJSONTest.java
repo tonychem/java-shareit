@@ -40,7 +40,7 @@ public class ItemRequestsJSONTest {
         List<ItemDto> list = List.of(itemDto);
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter excludingMillis = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        OutgoingItemRequestDto dto = new OutgoingItemRequestDto(1l, "description", now, list);
+        OutgoingItemRequestDto dto = new OutgoingItemRequestDto(1L, "description", now, list);
 
         JsonContent<OutgoingItemRequestDto> content = outgoingItemRequestDtoTester.write(dto);
 
@@ -53,7 +53,7 @@ public class ItemRequestsJSONTest {
     @SneakyThrows
     @Test
     public void outgoingItemRequestDtoNullValuesTest() {
-        OutgoingItemRequestDto dto = new OutgoingItemRequestDto(1l, "description", null, null);
+        OutgoingItemRequestDto dto = new OutgoingItemRequestDto(1L, "description", null, null);
 
         JsonContent<OutgoingItemRequestDto> content = outgoingItemRequestDtoTester.write(dto);
 

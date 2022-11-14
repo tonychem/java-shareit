@@ -1,8 +1,10 @@
 package ru.practicum.shareit.requests.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Value;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.time.LocalDateTime;

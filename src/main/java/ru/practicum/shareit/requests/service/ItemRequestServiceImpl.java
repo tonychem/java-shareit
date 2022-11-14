@@ -44,11 +44,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         List<Item> listOfSuitableItemsForUpdate = itemRepository.search(savedItemRequest.getDescription());
 
-        if(listOfSuitableItemsForUpdate.isEmpty()) {
+        if (listOfSuitableItemsForUpdate.isEmpty()) {
             return itemRequestMapper.toOutgoingItemRequestDto(savedItemRequest, null);
         } else {
 
-            for(Item i : listOfSuitableItemsForUpdate) {
+            for (Item i : listOfSuitableItemsForUpdate) {
                 i.setRequest(savedItemRequest);
                 itemRepository.save(i);
             }

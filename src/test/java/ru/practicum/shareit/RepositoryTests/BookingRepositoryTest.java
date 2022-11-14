@@ -24,7 +24,6 @@ public class BookingRepositoryTest {
     @Autowired
     private TestEntityManager em;
     private static LocalDateTime past1 = LocalDateTime.of(1999, 1, 1, 1, 1, 1);
-    ;
     private static LocalDateTime past2 = LocalDateTime.of(2000, 1, 1, 1, 1, 1);
     private static LocalDateTime future1 = LocalDateTime.of(2030, 1, 1, 1, 1, 1);
     private static LocalDateTime future2 = LocalDateTime.of(2031, 1, 1, 1, 1, 1);

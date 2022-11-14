@@ -38,7 +38,7 @@ public class ItemsJSONTest {
     @Test
     public void itemDtoTestRegular() {
         User user = new User(1, "user", "user@email.com");
-        ItemDto dto = new ItemDto(10, "item", "description", true, user, 15l);
+        ItemDto dto = new ItemDto(10, "item", "description", true, user, 15L);
 
         JsonContent<ItemDto> content = itemDtoTester.write(dto);
 
@@ -67,13 +67,13 @@ public class ItemsJSONTest {
     @Test
     public void incomingBookingCommentDtoRegularTest() {
         User user = new User(1, "user", "user@email.com");
-        BookingDtoShort previous = new BookingDtoShort(1l, 10l);
-        BookingDtoShort next = new BookingDtoShort(3l, 11l);
+        BookingDtoShort previous = new BookingDtoShort(1L, 10L);
+        BookingDtoShort next = new BookingDtoShort(3L, 11L);
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime tenDaysAgo = LocalDateTime.now().minusDays(10);
 
-        OutcomingCommentDto comment1 = new OutcomingCommentDto(1l, "comment1", "author", now);
-        OutcomingCommentDto comment2 = new OutcomingCommentDto(2l, "comment2", "author", tenDaysAgo);
+        OutcomingCommentDto comment1 = new OutcomingCommentDto(1L, "comment1", "author", now);
+        OutcomingCommentDto comment2 = new OutcomingCommentDto(2L, "comment2", "author", tenDaysAgo);
 
         List<OutcomingCommentDto> list = List.of(comment1, comment2);
 
