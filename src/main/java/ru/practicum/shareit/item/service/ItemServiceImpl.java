@@ -95,7 +95,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemBookingCommentDataDto itemById(long userId, long itemId) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchItemException("Не сущетсвует предмета с id = " + itemId));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchItemException("Не существует предмета с id = " + itemId));
         List<OutcomingCommentDto> comments = commentRepository.findCommentsByItemId(itemId).stream().map(commentMapper::toOutcomingCommentDto).collect(Collectors.toUnmodifiableList());
 
         if (item.getOwner().getId() != userId) {
@@ -112,9 +112,7 @@ public class ItemServiceImpl implements ItemService {
         }
         List<Item> itemsOfUser = itemRepository.findItemsOwnedBy(userId);
 
-        return itemsOfUser.stream().map(x -> {
-            return getItemWithBookingDateAndComment(userId, x.getId());
-        }).collect(Collectors.toUnmodifiableList());
+        return itemsOfUser.stream().map(x -> getItemWithBookingDateAndComment(userId, x.getId())).collect(Collectors.toUnmodifiableList());
     }
 
     @Override

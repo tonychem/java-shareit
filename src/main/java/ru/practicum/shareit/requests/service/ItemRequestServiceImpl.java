@@ -8,6 +8,7 @@ import ru.practicum.shareit.exception.exceptions.NoSuchRequestException;
 import ru.practicum.shareit.exception.exceptions.NoSuchUserException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.requests.dto.IncomingItemRequestDto;
 import ru.practicum.shareit.requests.dto.ItemRequestMapper;
@@ -40,7 +41,22 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         itemRequest.setRequester(requester);
         itemRequest.setCreated(now);
         ItemRequest savedItemRequest = requestRepository.save(itemRequest);
-        return itemRequestMapper.toOutgoingItemRequestDto(savedItemRequest, null);
+
+        List<Item> listOfSuitableItemsForUpdate = itemRepository.search(savedItemRequest.getDescription());
+
+        if(listOfSuitableItemsForUpdate.isEmpty()) {
+            return itemRequestMapper.toOutgoingItemRequestDto(savedItemRequest, null);
+        } else {
+
+            for(Item i : listOfSuitableItemsForUpdate) {
+                i.setRequest(savedItemRequest);
+                itemRepository.save(i);
+            }
+
+            return itemRequestMapper.toOutgoingItemRequestDto(savedItemRequest, listOfSuitableItemsForUpdate.stream()
+                    .map(itemMapper::toItemDto)
+                    .collect(Collectors.toUnmodifiableList()));
+        }
     }
 
     @Override
@@ -65,7 +81,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         Pageable pageable;
 
-        if (from == null && size == null) {
+        if (from == null || size == null) {
             pageable = Pageable.unpaged();
         } else {
             pageable = PageRequest.of(from, size);
