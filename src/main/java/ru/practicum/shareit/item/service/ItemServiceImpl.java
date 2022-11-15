@@ -96,7 +96,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemBookingCommentDataDto itemById(long userId, long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchItemException("Не существует предмета с id = " + itemId));
-        List<OutcomingCommentDto> comments = commentRepository.findCommentsByItemId(itemId).stream().map(commentMapper::toOutcomingCommentDto).collect(Collectors.toUnmodifiableList());
+        List<OutcomingCommentDto> comments = commentRepository.findCommentsByItemId(itemId).stream()
+                .map(commentMapper::toOutcomingCommentDto)
+                .collect(Collectors.toUnmodifiableList());
 
         if (item.getOwner().getId() != userId) {
             return itemMapper.toItemBookingCommentDataDto(item, null, null, comments);

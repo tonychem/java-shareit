@@ -9,10 +9,7 @@ import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exception.exceptions.MismatchedEntityRelationException;
-import ru.practicum.shareit.exception.exceptions.NoSuchBookingException;
-import ru.practicum.shareit.exception.exceptions.NoSuchUserException;
-import ru.practicum.shareit.exception.exceptions.UnsupportedStatusException;
+import ru.practicum.shareit.exception.exceptions.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
@@ -40,7 +37,7 @@ public class BookingsServiceImpl implements BookingService {
                 .orElseThrow(() -> new NoSuchUserException("Не существует пользователя с id = " + userId));
 
         Item item = itemRepository.findById(bookingDto.getItemId())
-                .orElseThrow(() -> new NoSuchUserException("Не существует вещи с id = " + bookingDto.getItemId()));
+                .orElseThrow(() -> new NoSuchItemException("Не существует вещи с id = " + bookingDto.getItemId()));
 
         if (userId == item.getOwner().getId()) {
             throw new MismatchedEntityRelationException("Владелец вещи не может забронировать свою");
