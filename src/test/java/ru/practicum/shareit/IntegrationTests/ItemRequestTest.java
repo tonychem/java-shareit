@@ -144,4 +144,12 @@ public class ItemRequestTest {
                 .andExpect(jsonPath("$.description", is(itemRequest.getDescription())))
                 .andExpect(jsonPath("$.items.[0].description", is(item.getDescription())));
     }
+
+    @SneakyThrows
+    @Test
+    public void shouldFailWhenGettingAListOfRequestsByNonExistingUser() {
+        mockMvc.perform(get("/requests/all")
+                .header("X-Sharer-User-Id", 100))
+                .andExpect(status().isNotFound());
+    }
 }

@@ -138,6 +138,12 @@ public class ItemTest {
                         .param("text", "description"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
+
+        //проверить пустой запрос
+        mockMvc.perform(get("/items/search")
+                        .param("text", ""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
     }
 
     @SneakyThrows
@@ -168,5 +174,13 @@ public class ItemTest {
                 .andExpect(jsonPath("$.name", is(item.getName())))
                 .andExpect(jsonPath("$.description", is(item.getDescription())))
                 .andExpect(jsonPath("$.comments", hasSize(2)));
+    }
+
+    @SneakyThrows
+    @Test
+    public void shouldFailWhenGettingListOfItemsOfNonexistingUser() {
+        mockMvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", 100))
+                .andExpect(status().isNotFound());
     }
 }
