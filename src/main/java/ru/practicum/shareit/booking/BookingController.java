@@ -47,7 +47,6 @@ public class BookingController {
                                                         @RequestParam(name = "state", defaultValue = "ALL") String state,
                                                         @RequestParam(name = "from", required = false) Integer from,
                                                         @RequestParam(name = "size", required = false) Integer size) {
-        String uppercasedState = state.toUpperCase();
-        return bookingService.getListOfBookedItemsByOwner(userId, uppercasedState, from, size);
+        return bookingService.getListOfBookedItemsByOwner(userId, state.toUpperCase(), from, size);
     }
 }
