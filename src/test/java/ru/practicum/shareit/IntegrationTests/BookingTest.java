@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -160,4 +161,11 @@ public class BookingTest {
                 .andExpect(content().string("[]"));
     }
 
+    @SneakyThrows
+    @Test
+    public void shouldFailToRetrieveUnexistingBooking() {
+        mockMvc.perform(get("/bookings/{bookingId}", 100)
+                .header("X-Sharer-User-Id", 100))
+                .andExpect(status().isNotFound());
+    }
 }

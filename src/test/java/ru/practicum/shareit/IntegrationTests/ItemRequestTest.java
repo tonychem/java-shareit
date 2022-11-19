@@ -19,6 +19,7 @@ import javax.transaction.Transactional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -71,5 +72,19 @@ public class ItemRequestTest {
                         .header("X-Sharer-User-Id", requesterId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    @SneakyThrows
+    public void shouldFailToRetrieveUnexistingRequestById() {
+        User user = new User(0, "name", "email@email.com");
+        em.persist(user);
+
+        TypedQuery<User> userTypedQuery = em.createQuery("select u from User u where u.name = :name", User.class);
+        long userId = userTypedQuery.setParameter("name", user.getName()).getSingleResult().getId();
+
+        mockMvc.perform(get("/requests/{requestId}", 100)
+                .header("X-Sharer-User-Id", userId))
+                .andExpect(status().isNotFound());
     }
 }

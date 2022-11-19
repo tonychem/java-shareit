@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
         resp.sendError(HttpServletResponse.SC_CONFLICT, exc.getMessage());
     }
 
-    @ExceptionHandler(value = {ConflictingFieldsException.class, PersistenceException.class})
+    @ExceptionHandler(value = {PersistenceException.class})
     public void handleConflictingFieldsException(RuntimeException exc, HttpServletResponse resp) throws IOException {
         resp.sendError(HttpServletResponse.SC_CONFLICT, exc.getMessage());
     }

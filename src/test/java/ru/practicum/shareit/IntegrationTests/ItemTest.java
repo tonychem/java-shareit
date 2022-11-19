@@ -15,6 +15,7 @@ import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,5 +50,13 @@ public class ItemTest {
                         .header("X-Sharer-User-Id", ownerId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(3)));
+    }
+
+    @SneakyThrows
+    @Test
+    public void shouldFailToRetrieveUnexistingItemById() {
+        mockMvc.perform(get("/items/{itemId}", 100)
+                .header("X-Sharer-User-Id", 100))
+                .andExpect(status().isNotFound());
     }
 }
