@@ -11,11 +11,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.requests.dto.IncomingItemRequestDto;
+import ru.practicum.shareit.requests.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -75,7 +77,7 @@ public class ItemRequestTest {
 
     @Test
     @SneakyThrows
-    public void shouldFailToRetrieveUnexistingRequestById() {
+    public void shouldFailToRetrieveInexistentRequestById() {
         User user = new User(0, "name", "email@email.com");
         em.persist(user);
 
@@ -83,7 +85,63 @@ public class ItemRequestTest {
         long userId = userTypedQuery.setParameter("name", user.getName()).getSingleResult().getId();
 
         mockMvc.perform(get("/requests/{requestId}", 100)
-                .header("X-Sharer-User-Id", userId))
+                        .header("X-Sharer-User-Id", userId))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @SneakyThrows
+    public void shouldReturnAllRequestsByOthers() {
+        User user = new User(0, "name", "user@email.com");
+        User requester = new User(0, "requester", "requester@email.com");
+        LocalDateTime now = LocalDateTime.now();
+
+        ItemRequest itemRequest1 = new ItemRequest(0, "description1", requester, now);
+        ItemRequest itemRequest2 = new ItemRequest(0, "description2", requester, now);
+
+        em.persist(user);
+        em.persist(requester);
+        em.persist(itemRequest1);
+        em.persist(itemRequest2);
+        em.flush();
+
+        TypedQuery<User> userTypedQuery = em.createQuery("select u from User u where u.name = :name", User.class);
+        long userId = userTypedQuery.setParameter("name", user.getName()).getSingleResult().getId();
+
+        mockMvc.perform(get("/requests/all")
+                        .header("X-Sharer-User-Id", userId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @Test
+    @SneakyThrows
+    public void shouldReturnRequestById() {
+        User user = new User(0, "name", "user@email.com");
+        User owner = new User(0, "owner", "owner@email.com");
+        LocalDateTime now = LocalDateTime.now();
+
+        ItemRequest itemRequest = new ItemRequest(0, "descriptionFromItemRequest", user, now);
+        Item item = new Item(0, "name", "descriptionFromItem", true, owner, itemRequest);
+
+        em.persist(user);
+        em.persist(owner);
+        em.persist(itemRequest);
+        em.persist(item);
+        em.flush();
+
+        TypedQuery<User> userTypedQuery = em.createQuery("select u from User u where u.name = :name", User.class);
+        TypedQuery<ItemRequest> itemRequestTypedQuery = em.createQuery("select ir from ItemRequest ir " +
+                "where ir.description = :description", ItemRequest.class);
+
+        long userId = userTypedQuery.setParameter("name", user.getName()).getSingleResult().getId();
+        long itemRequestId = itemRequestTypedQuery.setParameter("description", itemRequest.getDescription())
+                .getSingleResult().getId();
+
+        mockMvc.perform(get("/requests/{requestId}", itemRequestId)
+                        .header("X-Sharer-User-Id", userId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.description", is(itemRequest.getDescription())))
+                .andExpect(jsonPath("$.items.[0].description", is(item.getDescription())));
     }
 }

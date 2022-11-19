@@ -330,6 +330,12 @@ public class BookingTest {
                         .param("state", "rejected"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].itemId", is((int) itemForRejectedId)));
+
+        //без state ожидаем all
+        mockMvc.perform(get("/bookings/owner")
+                        .header("X-Sharer-User-Id", ownerId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(5)));
     }
 
     @SneakyThrows

@@ -13,6 +13,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.dto.IncomingCommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -118,5 +119,54 @@ public class ItemTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(dto.getText())))
                 .andExpect(jsonPath("$.authorName", is(owner.getName())));
+    }
+
+    @SneakyThrows
+    @Test
+    public void shouldFindByNameOrDescription() {
+        User owner = new User(0, "owner", "owner@email.com");
+        Item screwdriver = new Item(0, "screwdriver", "description", true, owner, null);
+        Item car = new Item(0, "description", "car", true, owner, null);
+
+        em.persist(owner);
+        em.persist(screwdriver);
+        em.persist(car);
+        em.flush();
+
+        //должен найти обе вещи по имени или описанию
+        mockMvc.perform(get("/items/search")
+                        .param("text", "description"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @SneakyThrows
+    @Test
+    public void shouldFindItemById() {
+        User owner = new User(0, "owner", "owner@email.com");
+        User author = new User(0, "author", "author@email.com");
+        Item item = new Item(0, "item", "itemDescription", true, owner, null);
+
+        Comment comment1 = new Comment(0, "text1", author, item, LocalDateTime.now());
+        Comment comment2 = new Comment(0, "text2", author, item, LocalDateTime.now());
+
+        em.persist(owner);
+        em.persist(author);
+        em.persist(item);
+        em.persist(comment1);
+        em.persist(comment2);
+
+        TypedQuery<User> userTypedQuery = em.createQuery("select u from User u where u.name = :name", User.class);
+        TypedQuery<Item> itemTypedQuery = em.createQuery("select i from Item i where i.name = :name", Item.class);
+
+        long itemId = itemTypedQuery.setParameter("name", item.getName()).getSingleResult().getId();
+        long userId = userTypedQuery.setParameter("name", owner.getName()).getSingleResult().getId();
+
+        mockMvc.perform(get("/items/{itemId}", itemId)
+                        .header("X-Sharer-User-Id", userId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is(item.getName())))
+                .andExpect(jsonPath("$.description", is(item.getDescription())))
+                .andExpect(jsonPath("$.comments", hasSize(2)));
     }
 }
