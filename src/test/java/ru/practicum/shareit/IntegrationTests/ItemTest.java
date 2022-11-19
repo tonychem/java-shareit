@@ -3,7 +3,6 @@ package ru.practicum.shareit.IntegrationTests;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,7 +19,6 @@ import ru.practicum.shareit.user.model.User;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
-
 import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -114,9 +112,9 @@ public class ItemTest {
         IncomingCommentDto dto = new IncomingCommentDto(0, "comment text");
 
         mockMvc.perform(post("/items/{itemId}/comment", itemId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(dto))
-                .header("X-Sharer-User-Id", ownerId))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dto))
+                        .header("X-Sharer-User-Id", ownerId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(dto.getText())))
                 .andExpect(jsonPath("$.authorName", is(owner.getName())));
