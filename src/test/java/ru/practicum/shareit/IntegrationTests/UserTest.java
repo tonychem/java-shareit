@@ -16,6 +16,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -90,5 +91,19 @@ public class UserTest {
 
         mockMvc.perform(get("/users/{userId}", userId))
                 .andExpect(status().isNotFound());
+    }
+
+    @SneakyThrows
+    @Test
+    public void shouldReturnAllUsers() {
+        User user1 = new User(0, "user1", "user1@email.com");
+        User user2 = new User(0, "user2", "user2@email.com");
+
+        em.persist(user1);
+        em.persist(user2);
+
+        mockMvc.perform(get("/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
     }
 }
