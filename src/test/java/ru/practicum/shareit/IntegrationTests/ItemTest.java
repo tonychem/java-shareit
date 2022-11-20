@@ -183,4 +183,29 @@ public class ItemTest {
                         .header("X-Sharer-User-Id", 100))
                 .andExpect(status().isNotFound());
     }
+
+    @SneakyThrows
+    @Test
+    public void shouldFailWhenCreatingCommentFromNotATenant() {
+        User owner = new User(0, "owner", "owner@email.com");
+        Item item = new Item(0, "item", "itemDescription", true, owner, null);
+
+        em.persist(owner);
+        em.persist(item);
+        em.flush();
+
+        TypedQuery<User> userTypedQuery = em.createQuery("select u from User u where u.name = :name", User.class);
+        TypedQuery<Item> itemTypedQuery = em.createQuery("select i from Item i where i.name = :name", Item.class);
+
+        long ownerId = userTypedQuery.setParameter("name", owner.getName()).getSingleResult().getId();
+        long itemId = itemTypedQuery.setParameter("name", item.getName()).getSingleResult().getId();
+
+        IncomingCommentDto dto = new IncomingCommentDto(0, "comment text");
+
+        mockMvc.perform(post("/items/{itemId}/comment", itemId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dto))
+                        .header("X-Sharer-User-Id", ownerId))
+                .andExpect(status().isBadRequest());
+    }
 }

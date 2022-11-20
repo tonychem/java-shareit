@@ -26,12 +26,14 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto patchItem(@RequestBody ItemDto itemDto, @PathVariable long itemId, @RequestHeader("X-Sharer-User-Id") long userId) {
+    public ItemDto patchItem(@RequestBody ItemDto itemDto, @PathVariable long itemId,
+                             @RequestHeader("X-Sharer-User-Id") long userId) {
         return itemService.update(userId, itemId, itemDto);
     }
 
     @GetMapping("/{itemId}")
-    public ItemBookingCommentDataDto getItem(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId) {
+    public ItemBookingCommentDataDto getItem(@RequestHeader("X-Sharer-User-Id") long userId,
+                                             @PathVariable long itemId) {
         return itemService.itemById(userId, itemId);
     }
 
@@ -46,7 +48,8 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public OutcomingCommentDto createComment(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId, @RequestBody @Validated IncomingCommentDto comment) {
+    public OutcomingCommentDto createComment(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId,
+                                             @RequestBody @Validated IncomingCommentDto comment) {
         return itemService.createComment(userId, itemId, comment);
     }
 }

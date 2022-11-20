@@ -56,6 +56,17 @@ public class UserTest {
 
     @Test
     @SneakyThrows
+    public void shouldFailWhenSavingUserWithIncompleteDto() {
+        UserDto userDto = new UserDto(0, null, "email@email.com");
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(userDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @SneakyThrows
     public void shouldUpdateExistingUser() {
         User user = new User(0, "name", "email@email.com");
 
