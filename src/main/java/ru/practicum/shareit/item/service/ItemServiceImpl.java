@@ -119,7 +119,7 @@ public class ItemServiceImpl implements ItemService {
             return itemsOfUser.stream()
                     .map(item -> getItemWithBookingDateAndComment(userId, item.getId()))
                     .collect(Collectors.toUnmodifiableList());
-        } else if (from < 1 || size < 1) {
+        } else if (from < 0 || size < 1) {
             throw new IllegalStateException("Неверные параметры запроса");
         } else {
             return itemsOfUser.stream()
@@ -143,7 +143,7 @@ public class ItemServiceImpl implements ItemService {
                     .filter(Item::getAvailable)
                     .map(itemMapper::toItemDto)
                     .collect(Collectors.toUnmodifiableList());
-        } else if (from < 1 || size < 1) {
+        } else if (from < 0 || size < 1) {
             throw new IllegalStateException("Неверные параметры запроса");
         } else {
             return found.stream()

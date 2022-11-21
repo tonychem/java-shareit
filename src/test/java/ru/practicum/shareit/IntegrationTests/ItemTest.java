@@ -148,6 +148,58 @@ public class ItemTest {
 
     @SneakyThrows
     @Test
+    public void shouldFailWhenPassingInvalidPaginationVariablesToSearching() {
+        mockMvc.perform(get("/items/search")
+                        .param("text", "anytext")
+                        .param("size", "0")
+                        .param("from", "0"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @SneakyThrows
+    @Test
+    public void shouldPaginateWhenSearchingByNameAndDescription() {
+        User owner = new User(0, "owner", "owner@email.com");
+        Item item1 = new Item(0, "item1", "description1", true, owner, null);
+        Item item2 = new Item(0, "item2", "description2", true, owner, null);
+        Item item3 = new Item(0, "item3", "description3", true, owner, null);
+
+        em.persist(owner);
+        em.persist(item1);
+        em.persist(item2);
+        em.persist(item3);
+
+        mockMvc.perform(get("/items/search")
+                        .param("text", "item")
+                        .param("from", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)));
+
+        mockMvc.perform(get("/items/search")
+                        .param("text", "item")
+                        .param("from", "0")
+                        .param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+
+        mockMvc.perform(get("/items/search")
+                        .param("text", "item")
+                        .param("from", "1")
+                        .param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+
+        mockMvc.perform(get("/items/search")
+                        .param("text", "item")
+                        .param("from", "1")
+                        .param("size", "3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @SneakyThrows
+    @Test
     public void shouldFindItemById() {
         User owner = new User(0, "owner", "owner@email.com");
         User author = new User(0, "author", "author@email.com");
@@ -182,6 +234,70 @@ public class ItemTest {
         mockMvc.perform(get("/items")
                         .header("X-Sharer-User-Id", 100))
                 .andExpect(status().isNotFound());
+    }
+
+    @SneakyThrows
+    @Test
+    public void shouldPaginateWhenFindingItemsOfUser() {
+        User owner = new User(0, "owner", "owner@email.com");
+        Item item1 = new Item(0, "item1", "description1", true, owner, null);
+        Item item2 = new Item(0, "item2", "description2", true, owner, null);
+        Item item3 = new Item(0, "item3", "description3", true, owner, null);
+
+        em.persist(owner);
+        em.persist(item1);
+        em.persist(item2);
+        em.persist(item3);
+        em.flush();
+
+        TypedQuery<User> userTypedQuery = em.createQuery("select u from User u where u.name = :name", User.class);
+        long userId = userTypedQuery.setParameter("name", owner.getName()).getSingleResult().getId();
+
+        mockMvc.perform(get("/items")
+                .header("X-Sharer-User-Id", userId)
+                .param("from", "0")
+                .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)));
+
+        mockMvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", userId)
+                        .param("from", "0")
+                        .param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+
+        mockMvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", userId)
+                        .param("from", "1")
+                        .param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+
+        mockMvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", userId)
+                        .param("from", "1")
+                        .param("size", "3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @SneakyThrows
+    @Test
+    public void shouldFailWhenPassingInvalidPaginationVariablesToFindingItemsOfUser() {
+        User user = new User(0, "user", "user@email.com");
+
+        em.persist(user);
+        em.flush();
+
+        TypedQuery<User> userTypedQuery = em.createQuery("select u from User u where u.name = :name", User.class);
+        long userId = userTypedQuery.setParameter("name", user.getName()).getSingleResult().getId();
+
+        mockMvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", userId)
+                        .param("size", "-1")
+                        .param("from", "-1"))
+                .andExpect(status().isBadRequest());
     }
 
     @SneakyThrows
