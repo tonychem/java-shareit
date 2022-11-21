@@ -152,10 +152,10 @@ public class BookingsServiceImpl implements BookingService {
         List<Booking> allBookedItemsOfUser = bookingRepository.findByItemIn(itemRepository.findItemsOwnedBy(userId));
         LocalDateTime now = LocalDateTime.now();
 
-        Comparator<Booking> compareByEndTimeDesc = (x, y) -> {
-            if (x.getEnd().isAfter(y.getEnd())) {
+        Comparator<Booking> compareByEndTimeDesc = (bookingFirst, bookingSecond) -> {
+            if (bookingFirst.getEnd().isAfter(bookingSecond.getEnd())) {
                 return -1;
-            } else if (x.getEnd().isBefore(y.getEnd())) {
+            } else if (bookingFirst.getEnd().isBefore(bookingSecond.getEnd())) {
                 return 1;
             } else return 0;
         };
@@ -166,35 +166,35 @@ public class BookingsServiceImpl implements BookingService {
         switch (state) {
             case ("CURRENT"):
                 fullListOfBookings = allBookedItemsOfUser.stream()
-                        .filter(x -> x.getStart().isBefore(now) && x.getEnd().isAfter(now))
+                        .filter(booking -> booking.getStart().isBefore(now) && booking.getEnd().isAfter(now))
                         .sorted(compareByEndTimeDesc)
                         .map(bookingMapper::toBookingDto)
                         .collect(Collectors.toUnmodifiableList());
                 break;
             case ("PAST"):
                 fullListOfBookings = allBookedItemsOfUser.stream()
-                        .filter(x -> x.getStart().isBefore(now) && x.getEnd().isBefore(now))
+                        .filter(booking -> booking.getStart().isBefore(now) && booking.getEnd().isBefore(now))
                         .sorted(compareByEndTimeDesc)
                         .map(bookingMapper::toBookingDto)
                         .collect(Collectors.toUnmodifiableList());
                 break;
             case ("FUTURE"):
                 fullListOfBookings = allBookedItemsOfUser.stream()
-                        .filter(x -> x.getStart().isAfter(now))
+                        .filter(booking -> booking.getStart().isAfter(now))
                         .sorted(compareByEndTimeDesc)
                         .map(bookingMapper::toBookingDto)
                         .collect(Collectors.toUnmodifiableList());
                 break;
             case ("WAITING"):
                 fullListOfBookings = allBookedItemsOfUser.stream()
-                        .filter(x -> x.getStatus() == BookingStatus.WAITING)
+                        .filter(booking -> booking.getStatus() == BookingStatus.WAITING)
                         .sorted(compareByEndTimeDesc)
                         .map(bookingMapper::toBookingDto)
                         .collect(Collectors.toUnmodifiableList());
                 break;
             case ("REJECTED"):
                 fullListOfBookings = allBookedItemsOfUser.stream()
-                        .filter(x -> x.getStatus() == BookingStatus.REJECTED)
+                        .filter(booking -> booking.getStatus() == BookingStatus.REJECTED)
                         .sorted(compareByEndTimeDesc)
                         .map(bookingMapper::toBookingDto)
                         .collect(Collectors.toUnmodifiableList());

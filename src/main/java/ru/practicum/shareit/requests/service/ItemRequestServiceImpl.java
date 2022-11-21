@@ -63,11 +63,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<OutgoingItemRequestDto> getListOfPersonalRequests(long userId) {
         User requester = userRepository.findById(userId).orElseThrow(() -> new NoSuchUserException("Не существует пользователя с id = " + userId));
         return requestRepository.getItemRequestsByRequesterIdOrderByCreatedDesc(userId).stream()
-                .map(x -> {
-                    List<ItemDto> items = itemRepository.getItemsByRequestId(x.getId()).stream()
+                .map(itemRequest -> {
+                    List<ItemDto> items = itemRepository.getItemsByRequestId(itemRequest.getId()).stream()
                             .map(itemMapper::toItemDto)
                             .collect(Collectors.toUnmodifiableList());
-                    return itemRequestMapper.toOutgoingItemRequestDto(x, items);
+                    return itemRequestMapper.toOutgoingItemRequestDto(itemRequest, items);
                 })
                 .collect(Collectors.toList());
     }
@@ -88,11 +88,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         }
 
         return requestRepository.getItemRequestsByRequesterIdIsNotOrderByCreatedDesc(userId, pageable).stream()
-                .map(x -> {
-                    List<ItemDto> items = itemRepository.getItemsByRequestId(x.getId()).stream()
+                .map(itemRequest -> {
+                    List<ItemDto> items = itemRepository.getItemsByRequestId(itemRequest.getId()).stream()
                             .map(itemMapper::toItemDto)
                             .collect(Collectors.toUnmodifiableList());
-                    return itemRequestMapper.toOutgoingItemRequestDto(x, items);
+                    return itemRequestMapper.toOutgoingItemRequestDto(itemRequest, items);
                 })
                 .collect(Collectors.toUnmodifiableList());
     }

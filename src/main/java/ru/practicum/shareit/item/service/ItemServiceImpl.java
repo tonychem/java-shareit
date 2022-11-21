@@ -47,7 +47,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDto create(long userId, ItemDto itemDto) {
-        User creator = userRepository.findById(userId).orElseThrow(() -> new NoSuchUserException("Не существует пользователя с id = " + userId));
+        User creator = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchUserException("Не существует пользователя с id = " + userId));
         ItemRequest request = null;
 
         if (itemDto.getRequestId() != null) {
@@ -95,7 +96,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemBookingCommentDataDto itemById(long userId, long itemId) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchItemException("Не существует предмета с id = " + itemId));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NoSuchItemException("Не существует предмета с id = " + itemId));
         List<OutcomingCommentDto> comments = commentRepository.findCommentsByItemId(itemId).stream()
                 .map(commentMapper::toOutcomingCommentDto)
                 .collect(Collectors.toUnmodifiableList());
@@ -157,11 +159,17 @@ public class ItemServiceImpl implements ItemService {
 
     public ItemBookingCommentDataDto getItemWithBookingDateAndComment(long userId, long itemId) {
         LocalDateTime now = LocalDateTime.now();
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchItemException("Не существует предмета с id = " + itemId));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NoSuchItemException("Не существует предмета с id = " + itemId));
 
-        BookingDtoShort previousBooking = bookingMapper.toBookingDtoShort(bookingRepository.getPreviousBooking(itemId, now));
-        BookingDtoShort nextBooking = bookingMapper.toBookingDtoShort(bookingRepository.getNextBooking(itemId, now));
-        List<OutcomingCommentDto> comments = commentRepository.findCommentsByItemId(itemId).stream().map(commentMapper::toOutcomingCommentDto).collect(Collectors.toUnmodifiableList());
+        BookingDtoShort previousBooking =
+                bookingMapper.toBookingDtoShort(bookingRepository.getPreviousBooking(itemId, now));
+        BookingDtoShort nextBooking =
+                bookingMapper.toBookingDtoShort(bookingRepository.getNextBooking(itemId, now));
+
+        List<OutcomingCommentDto> comments = commentRepository.findCommentsByItemId(itemId).stream()
+                .map(commentMapper::toOutcomingCommentDto)
+                .collect(Collectors.toUnmodifiableList());
 
         return itemMapper.toItemBookingCommentDataDto(item, previousBooking, nextBooking, comments);
     }
@@ -169,10 +177,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public OutcomingCommentDto createComment(long userId, long itemId, IncomingCommentDto incomingCommentDto) {
-        User tenant = userRepository.findById(userId).orElseThrow(() -> new NoSuchUserException("Не существует пользователя с id = " + userId));
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchItemException("Не существует вещи с id = " + itemId));
+        User tenant = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchUserException("Не существует пользователя с id = " + userId));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NoSuchItemException("Не существует вещи с id = " + itemId));
 
-        List<Booking> bookingsByUser = bookingRepository.findByItemIdAndBookerIdAndStatusAndEndBefore(itemId, userId, BookingStatus.APPROVED, LocalDateTime.now());
+        List<Booking> bookingsByUser =
+                bookingRepository.findByItemIdAndBookerIdAndStatusAndEndBefore(itemId, userId,
+                        BookingStatus.APPROVED, LocalDateTime.now());
 
         if (bookingsByUser.isEmpty()) {
             throw new IllegalStateException("Пользователь не найден в арендаторах вещи");
