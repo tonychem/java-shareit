@@ -108,22 +108,51 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemBookingCommentDataDto> itemsOfUser(long userId) {
+    public Collection<ItemBookingCommentDataDto> itemsOfUser(long userId, Integer from, Integer size) {
         if (!userRepository.existsById(userId)) {
             throw new NoSuchUserException("Не существует пользователя с id = " + userId);
         }
+
         List<Item> itemsOfUser = itemRepository.findItemsOwnedBy(userId);
 
-        return itemsOfUser.stream().map(x -> getItemWithBookingDateAndComment(userId, x.getId())).collect(Collectors.toUnmodifiableList());
+        if (from == null & size == null) {
+            return itemsOfUser.stream()
+                    .map(item -> getItemWithBookingDateAndComment(userId, item.getId()))
+                    .collect(Collectors.toUnmodifiableList());
+        } else if (from < 1 || size < 1) {
+            throw new IllegalStateException("Неверные параметры запроса");
+        } else {
+            return itemsOfUser.stream()
+                    .map(item -> getItemWithBookingDateAndComment(userId, item.getId()))
+                    .skip(from)
+                    .limit(size)
+                    .collect(Collectors.toUnmodifiableList());
+        }
     }
 
     @Override
-    public Collection<ItemDto> searchByNameAndDescription(String text) {
+    public Collection<ItemDto> searchByNameAndDescription(String text, Integer from, Integer size) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
+
         List<Item> found = itemRepository.search(text);
-        return found.stream().filter(Item::getAvailable).map(itemMapper::toItemDto).collect(Collectors.toUnmodifiableList());
+
+        if (from == null & size == null) {
+            return found.stream()
+                    .filter(Item::getAvailable)
+                    .map(itemMapper::toItemDto)
+                    .collect(Collectors.toUnmodifiableList());
+        } else if (from < 1 || size < 1) {
+            throw new IllegalStateException("Неверные параметры запроса");
+        } else {
+            return found.stream()
+                    .filter(Item::getAvailable)
+                    .map(itemMapper::toItemDto)
+                    .skip(from)
+                    .limit(size)
+                    .collect(Collectors.toUnmodifiableList());
+        }
     }
 
     public ItemBookingCommentDataDto getItemWithBookingDateAndComment(long userId, long itemId) {

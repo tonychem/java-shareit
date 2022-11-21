@@ -14,9 +14,9 @@ public interface ItemService {
 
     ItemBookingCommentDataDto itemById(long userId, long itemId);
 
-    Collection<ItemBookingCommentDataDto> itemsOfUser(long userId);
+    Collection<ItemBookingCommentDataDto> itemsOfUser(long userId, Integer from, Integer size);
 
-    Collection<ItemDto> searchByNameAndDescription(String text);
+    Collection<ItemDto> searchByNameAndDescription(String text, Integer from, Integer size);
 
     OutcomingCommentDto createComment(long userId, long itemId, IncomingCommentDto comment);
 }

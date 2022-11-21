@@ -38,13 +38,17 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemBookingCommentDataDto> items(@RequestHeader("X-Sharer-User-Id") long userId) {
-        return itemService.itemsOfUser(userId);
+    public Collection<ItemBookingCommentDataDto> items(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                       @RequestParam(value = "from", required = false) Integer from,
+                                                       @RequestParam(value = "size", required = false) Integer size) {
+        return itemService.itemsOfUser(userId, from, size);
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> itemSearch(@RequestParam("text") String text) {
-        return itemService.searchByNameAndDescription(text);
+    public Collection<ItemDto> itemSearch(@RequestParam("text") String text,
+                                          @RequestParam(value = "from", required = false) Integer from,
+                                          @RequestParam(value = "size", required = false) Integer size) {
+        return itemService.searchByNameAndDescription(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

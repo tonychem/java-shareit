@@ -80,7 +80,7 @@ public class ItemControllerTest {
 
     @Test
     public void shouldReturnEmptyListOnEmptySearchParam() throws Exception {
-        when(itemService.searchByNameAndDescription("")).thenReturn(Collections.emptyList());
+        when(itemService.searchByNameAndDescription("", null, null)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/search")
                         .param("text", "")
