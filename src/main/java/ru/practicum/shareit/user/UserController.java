@@ -32,12 +32,12 @@ public class UserController {
         return userService.users();
     }
 
-    @GetMapping("{userId}")
+    @GetMapping("/{userId}")
     public UserDto userById(@PathVariable long userId) {
         return userService.userById(userId);
     }
 
-    @DeleteMapping("{userId}")
+    @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable long userId) {
         userService.deleteUser(userId);
     }

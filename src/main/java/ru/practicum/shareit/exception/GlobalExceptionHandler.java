@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, exc.getMessage());
     }
 
-    @ExceptionHandler(value = {NoSuchUserException.class, NoSuchItemException.class, NoSuchBookingException.class, MismatchedEntityRelationException.class})
+    @ExceptionHandler(value = {NoSuchRequestException.class, NoSuchUserException.class, NoSuchItemException.class, NoSuchBookingException.class, MismatchedEntityRelationException.class})
     public void handleMissingEntityExceptions(RuntimeException exc, HttpServletResponse resp) throws IOException {
         resp.sendError(HttpServletResponse.SC_NOT_FOUND, exc.getMessage());
     }
@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
         resp.sendError(HttpServletResponse.SC_CONFLICT, exc.getMessage());
     }
 
-    @ExceptionHandler(value = {ConflictingFieldsException.class, PersistenceException.class})
+    @ExceptionHandler(value = {PersistenceException.class})
     public void handleConflictingFieldsException(RuntimeException exc, HttpServletResponse resp) throws IOException {
         resp.sendError(HttpServletResponse.SC_CONFLICT, exc.getMessage());
     }

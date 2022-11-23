@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Value;
 import org.springframework.lang.Nullable;
-import ru.practicum.shareit.requests.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.validation.constraints.NotBlank;
@@ -23,5 +22,5 @@ public class ItemDto {
     @Nullable
     User owner;
     @Nullable
-    ItemRequest request;
+    Long requestId;
 }
