@@ -25,6 +25,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -120,12 +121,14 @@ public class ItemServiceImpl implements ItemService {
         if (from == null || size == null) {
             return itemsOfUser.stream()
                     .map(item -> getItemWithBookingDateAndComment(userId, item.getId()))
+                    .sorted(Comparator.comparing(ItemBookingCommentDataDto::getId))
                     .collect(Collectors.toUnmodifiableList());
         } else {
             return itemsOfUser.stream()
                     .map(item -> getItemWithBookingDateAndComment(userId, item.getId()))
                     .skip(from)
                     .limit(size)
+                    .sorted(Comparator.comparing(ItemBookingCommentDataDto::getId))
                     .collect(Collectors.toUnmodifiableList());
         }
     }
