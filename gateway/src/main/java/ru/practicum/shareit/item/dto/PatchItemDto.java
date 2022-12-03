@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
-import io.micrometer.core.lang.Nullable;
 import lombok.Value;
+import org.springframework.lang.Nullable;
 
 @Value
 public class PatchItemDto {
