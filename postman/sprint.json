@@ -1772,6 +1772,61 @@
 					"response": []
 				},
 				{
+					"name": "Item get all user 4",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+									"});",
+									"pm.test(\"Test get all\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length, 'items count in total').to.eql(2);",
+									"    ",
+									"    pm.expect(jsonData[0].id, 'result[0]: \"id\" field').to.eql(2);",
+									"    pm.expect(jsonData[0].name, 'result[0]: \"name\" field').to.eql('Отвертка');",
+									"    pm.expect(jsonData[0].description, 'result[0]: \"description\" field').to.eql('Аккумуляторная отвертка');",
+									"    pm.expect(jsonData[0].available, 'result[0]: \"available\" field').to.true;",
+									"",
+									"    pm.expect(jsonData[1].id, 'result[1]: \"id\" field').to.eql(3);",
+									"    pm.expect(jsonData[1].name, 'result[1]: \"name\" field').to.eql('Клей Момент');",
+									"    pm.expect(jsonData[1].description, 'result[1]: \"description\" field').to.eql('Тюбик суперклея марки Момент');",
+									"    pm.expect(jsonData[1].available, 'result[1]: \"available\" field').to.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Sharer-User-Id",
+								"value": "4",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/items",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Item search аккумуляторная",
 					"event": [
 						{
