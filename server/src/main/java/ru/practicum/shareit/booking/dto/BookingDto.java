@@ -7,7 +7,6 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-import javax.validation.constraints.FutureOrPresent;
 import java.time.LocalDateTime;
 
 @Value
@@ -15,10 +14,8 @@ import java.time.LocalDateTime;
 public class BookingDto {
     long id;
     @Nullable
-    @FutureOrPresent
     LocalDateTime start;
     @Nullable
-    @FutureOrPresent
     LocalDateTime end;
     @Nullable
     Item item;
